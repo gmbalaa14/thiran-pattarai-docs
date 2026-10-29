@@ -63,7 +63,7 @@ in the marketplace repo. If you change one side, open a matching pull request in
 npm run build
 ```
 
-It must finish without errors. CI does not build pull requests from forks automatically, so run it before you submit.
+It must finish without errors. CI runs the same build on every pull request.
 
 ## Submitting a PR
 
