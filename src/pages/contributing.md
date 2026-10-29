@@ -1,0 +1,113 @@
+---
+layout: ../layouts/Doc.astro
+title: Contributing
+description: How to add a skill or a plugin to Thiran Pattarai, and get your change merged.
+---
+
+# Contributing
+
+<p class="lede">Adding a skill is a folder and a file. Adding a plugin is one more folder and one catalogue entry. The docs site discovers both on its own.</p>
+
+Everyone taking part is expected to follow the [Code of Conduct](/code-of-conduct/).
+
+## How the repository is organised
+
+```text
+.claude-plugin/marketplace.json   marketplace catalogue (name: pattarai)
+plugins/<plugin>/                 one folder per plugin
+  .claude-plugin/plugin.json
+  skills/<skill>/SKILL.md
+scripts/validate.py               manifest and skill checks used in CI
+brand/                            logos, favicon and banners
+```
+
+## Add a skill to an existing plugin
+
+1. Create `plugins/<plugin>/skills/<your-skill>/SKILL.md`.
+2. Start it with frontmatter. The name must match the folder:
+
+```markdown
+---
+name: your-skill
+description: One or two sentences on what it does and when Claude should use it.
+metadata:
+  author: "Your Name"
+  version: "1.0.0"
+---
+```
+
+3. Put helper files next to it in `references/` or `scripts/`.
+4. Save files with LF line endings. CI rejects CRLF in `SKILL.md`.
+5. Open a pull request.
+
+That is enough for the skill to appear on the site, with its name, description, version and requirements read straight from `SKILL.md`. For a richer page (when to use it, how it works, an example), open a pull request in the [docs repository](https://github.com/gmbalaa14/thiran-pattarai-docs) adding an entry in `src/data/skill-docs.ts`.
+
+## Add a new plugin
+
+1. Create `plugins/<new-plugin>/.claude-plugin/plugin.json` and a `skills/` folder with at least one skill.
+2. Add the plugin to the `plugins` array in `.claude-plugin/marketplace.json`, with the same name and version as in its `plugin.json`.
+3. Run `python3 scripts/validate.py`.
+
+Naming: the core plugin is `thiran`. Domain plugins use `thiran-<domain>`, such as `thiran-devops`. Names must be kebab-case. The plugin name is also the command prefix, so keep it short.
+
+## Refer to bundled scripts safely
+
+A plugin is copied into a cache folder when installed, so never hard-code `~/.claude/skills/...`. Use `${CLAUDE_SKILL_DIR}` instead:
+
+```bash
+python ${CLAUDE_SKILL_DIR}/scripts/render_diff.py "$FILE"
+```
+
+To call a script in a sibling skill of the same plugin, use `${CLAUDE_SKILL_DIR}/../<other-skill>/scripts/...`.
+
+## Documentation site
+
+The site lives in its own repository, [thiran-pattarai-docs](https://github.com/gmbalaa14/thiran-pattarai-docs), so installing the marketplace does not download it. It is built with [Astro](https://astro.build/) and deploys to GitHub Pages.
+
+- Skill and plugin pages are generated from the manifests and `SKILL.md` files in the marketplace repository. A merge to `main` there rebuilds the site automatically.
+- Hand-written pages, sidebar entries (`src/data/nav.ts`) and richer skill pages (`src/data/skill-docs.ts`) are changed with a pull request in the docs repository.
+
+If you change `CONTRIBUTING.md` or `CODE_OF_CONDUCT.md` in the marketplace repository, open a matching pull request in the docs repository (`src/pages/contributing.md` and `src/pages/code-of-conduct.md`). To run the site locally, follow the docs repository README.
+
+## Validate your change
+
+```bash
+python3 scripts/validate.py          # manifests and skills
+```
+
+CI runs this on every pull request.
+
+## Releasing a change
+
+Bump `version` for the plugin in both its `plugin.json` and the marketplace entry. Installed copies update only when the version changes. Plugins are versioned independently.
+
+## Submitting a PR
+
+1. Fork the repository.
+2. Create a branch: `git checkout -b add-<skill-or-plugin-name>`.
+3. Make your change, following the sections above.
+4. Run the checks in [Validate your change](#validate-your-change).
+5. Open a pull request against `main`. The pull request template fills in automatically; tick every item that applies and delete the ones that do not.
+
+## PR checklist
+
+The pull request template covers four groups of checks:
+
+- **Skills:** folder name matches `name` in `SKILL.md`, frontmatter is present, LF line endings, and no hard-coded `~/.claude/skills` paths.
+- **Plugins and versioning:** new plugins are in `marketplace.json` with matching name and version, and changed plugins have their version bumped in both manifests.
+- **Documentation:** a skill that changes a rule updates its `rules.json` (if it has one) in the same PR, and a change to `CONTRIBUTING.md` or `CODE_OF_CONDUCT.md` has a matching pull request in the docs repository.
+- **Testing:** `python3 scripts/validate.py` passes, and the skill has been tried in Claude Code.
+
+## Reporting issues
+
+Use the [issue templates](https://github.com/gmbalaa14/thiran-pattarai/issues/new/choose):
+
+- **Bug report:** a skill misbehaves, a plugin fails to install, or the site is broken.
+- **Skill or plugin request:** a new skill, a new plugin, or an improvement to an existing skill.
+- **Documentation issue:** something on the site or in a README is unclear, wrong or missing.
+
+Blank issues are turned off so every report has the details needed to act on it. Report Code of Conduct concerns privately, as described in the [Code of Conduct](/code-of-conduct/#enforcement).
+
+## License
+
+By contributing, you agree your contribution is licensed under MIT.

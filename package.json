@@ -1,0 +1,16 @@
+{
+  "name": "thiran-pattarai-docs",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "marketplace": "node scripts/fetch-marketplace.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.18.0",
+    "yaml": "^2.6.0"
+  }
+}
